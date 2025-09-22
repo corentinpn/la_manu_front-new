@@ -1,0 +1,35 @@
+name: CD Pipeline
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout du code
+        uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+
+      - name: Init Terraform
+        run: terraform init
+
+      - name: Apply Terraform (création VM)
+        run: terraform apply -auto-approve
+
+      - name: Install Ansible
+        run: |
+          sudo apt update
+          sudo apt install -y ansible
+
+      - name: Provision VM avec Ansible
+        run: |
+          ansible-playbook ansible/provision.yml -i ansible/inventory.ini
+
+      - name: Déploiement Docker avec Ansible
+        run: |
+          ansible-playbook ansible/deploy.yml -i ansible/inventory.ini
