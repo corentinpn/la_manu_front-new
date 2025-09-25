@@ -1,0 +1,19 @@
+- hosts: web
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Installer SSH et Python
+      apt:
+        name:
+          - openssh-server
+          - python3
+        update_cache: yes
+
+    - name: Configurer et démarrer SSH
+      shell: |
+        mkdir -p /var/run/sshd
+        echo 'root:root' | chpasswd
+        sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
+        /usr/sbin/sshd
+      args:
+        executable: /bin/bash
