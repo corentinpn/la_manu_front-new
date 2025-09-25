@@ -9,12 +9,33 @@ jobs:
     runs-on: self-hosted
 
     steps:
-      - name:  Checkout du code
+      - name: Checkout du code
         uses: actions/checkout@v3
 
-      - name:  Rendre le script deploy.sh exécutable
-        run: chmod +x ansible/deploy.sh
+      # Terraform dans le dossier infra
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
 
-      - name:  Exécuter le script complet (Terraform + Ansible)
-        run: ./deploy.sh
+      - name: Init Terraform
+        run: terraform init
+        working-directory: infra
+
+      - name: Apply Terraform (création VM)
+        run: terraform apply -auto-approve
+        working-directory: infra
+
+      # Ansible dans le dossier ansible
+      - name: Installer Ansible
+        run: |
+          sudo apt update
+          sudo apt install -y ansible
+
+      - name: Provision VM avec Ansible
+        run: |
+          ansible-playbook provision.yml -i inventory.ini
+        working-directory: ansible
+
+      - name: Déploiement Docker avec Ansible
+        run: |
+          ansible-playbook deploy.yml -i inventory.ini
         working-directory: ansible
