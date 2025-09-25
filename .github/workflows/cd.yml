@@ -12,24 +12,30 @@ jobs:
       - name: Checkout du code
         uses: actions/checkout@v3
 
+      # Terraform dans le dossier infra
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
 
       - name: Init Terraform
         run: terraform init
+        working-directory: infra
 
       - name: Apply Terraform (création VM)
         run: terraform apply -auto-approve
+        working-directory: infra
 
-      - name: Install Ansible
+      # Ansible dans le dossier ansible
+      - name: Installer Ansible
         run: |
           sudo apt update
           sudo apt install -y ansible
 
       - name: Provision VM avec Ansible
         run: |
-          ansible-playbook ansible/provision.yml -i ansible/inventory.ini
+          ansible-playbook provision.yml -i inventory.ini
+        working-directory: ansible
 
       - name: Déploiement Docker avec Ansible
         run: |
-          ansible-playbook ansible/deploy.yml -i ansible/inventory.ini
+          ansible-playbook deploy.yml -i inventory.ini
+        working-directory: ansible
