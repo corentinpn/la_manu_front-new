@@ -1,0 +1,24 @@
+---
+- name: Déploiement Infra + Provisionnement
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  tasks:
+    - name: Initialiser Terraform
+      ansible.builtin.command:
+        cmd: terraform init
+      args:
+        chdir: ../infra
+
+    - name: Appliquer Terraform
+      ansible.builtin.command:
+        cmd: terraform apply -auto-approve
+      args:
+        chdir: ../infra
+
+    - name: Lancer le provisionnement Ansible
+      ansible.builtin.command:
+        cmd: ansible-playbook provision.yml -i inventory.ini
+      args:
+        chdir: ../ansible
